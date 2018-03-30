@@ -1,30 +1,60 @@
 # FDC2214 Arduino Library
-Library for Texas Instruments FDC2112, FDC2114, FDC2212 and FDC2214 capacitative sensor front-ends.
+Library for Texas Instruments FDC2xxx family capacitative sensor front-ends.
 
+# Supported devices
+>* FDC2112 
+>* FDC2114
+>* FDC2212
+>* FDC2214
 
+# Usage
+Include header, Make instance, Init and acquire data.
 
+```cpp
+#include "FDC2214.h"
+FDC2214 capsense(FDC2214_I2C_ADDR_0); // Use FDC2214_I2C_ADDR_1 for ADDR = VCC
+...
+void setup() {
+    ...
+    Wire.begin();
+    bool capOk = capsense.begin(0x3, 0x4, 0x5); //setup first two channels, autoscan with 2 channels, deglitch at 10MHz 
+    ...
+}
+void loop(){
+    ...
+        unsigned long capa[i] = capsense.getReading28(i);  
+    ...
+}
+```
 
 # Hardware
-Tested on YB1F2 contproller.
+FDC2xxx family is 3.3V powered, unlike most of Arduinos, that are powered form 5V.
+**To use this chip with Arduino, you will have to either:**
+> 1. use 3.3V version of Arduino, like Arduino Pro Mini 8MHz 3.3V 
+> 2. use I2C level shifter to interface the FDC chip with arduino.
 
-
-# Protocol
-The protocol is similar to NEC with different timing and data fields. Low level decode is implemented. High level protocol decode shows about hald of data fields. Other half is missing. It seems that there might be a block with checksum that has to be decoded.
-
+**To run examples, connect FDC with arduino as follows:**
+ >* ARDUINO <--> FDC 
+ >* A4 <-------> SDA
+ >* A5 --------> SCL
+ >* GND -------> ADR
+ >* GND -------> SD
+  
 # Tools
 To view nice real-time graph of the sensor output, it is highly recommended to use tool like SerialPlot.
 https://bitbucket.org/hyOzd/serialplot
 Binary downloads avialable here: https://bitbucket.org/hyOzd/serialplot/downloads/
 
-Settings for SerialPlot:
-![Transmitter Front](https://raw.githubusercontent.com/zharijs/AlpicAir-Remote-Pulseview/master/pics/aa-front.jpg "Transmitter Front")
-![Transmitter Back](https://raw.githubusercontent.com/zharijs/AlpicAir-Remote-Pulseview/master/pics/aa-back.jpg "Transmitter Back")
+**Setting up port:**
+![Port](https://github.com/zharijs/FDC2214/blob/master/extras/images/fdc-on-serialplot-port.PNG?raw=true "Port")
 
+**Setting up data format:**
+![Data Format](https://github.com/zharijs/FDC2214/blob/master/extras/images/fdc-on-serialplot-dataformat.PNG?raw=true "Data Format")
 
+**Proximity sensing waveform:**
+![Signal](https://github.com/zharijs/FDC2214/blob/master/extras/images/fdc-on-serialplot-signal.PNG?raw=true "Signal")
 
-# Usage
-Add to your Sigrok/PulseView install directory.
+**Noise waveform:**
+![Noise](https://github.com/zharijs/FDC2214/blob/master/extras/images/fdc-on-serialplot-noise.PNG?raw=true "Noise")
 
-Example:
-C:\Program Files (x86)\sigrok\PulseView\share\libsigrokdecode\decoders\
-This 
+#Have Fun
