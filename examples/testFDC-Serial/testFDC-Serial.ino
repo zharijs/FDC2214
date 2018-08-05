@@ -45,16 +45,18 @@ void setup() {
   
   // ### Start FDC
   // Start FDC2212 with 2 channels init
-  bool capOk = capsense.begin(0x3, 0x4, 0x5); //setup first two channels, autoscan with 2 channels, deglitch at 10MHz 
+//  bool capOk = capsense.begin(0x3, 0x4, 0x5, false); //setup first two channels, autoscan with 2 channels, deglitch at 10MHz, external oscillator 
   // Start FDC2214 with 4 channels init
-  //bool capOk = capsense.begin(0xF, 0x4, 0x5); //setup all four channels, autoscan with 2 channels, deglitch at 10MHz 
+  bool capOk = capsense.begin(0xF, 0x6, 0x5, false); //setup all four channels, autoscan with 4 channels, deglitch at 10MHz, external oscillator 
+  // Start FDC2214 with 4 channels init
+//  bool capOk = capsense.begin(0xF, 0x6, 0x5, true); //setup all four channels, autoscan with 4 channels, deglitch at 10MHz, internal oscillator 
   if (capOk) Serial.println("Sensor OK");  
   else Serial.println("Sensor Fail");  
 
 }
 
 // ### Tell aplication how many chanels will be smapled in main loop
-#define CHAN_COUNT 2 
+#define CHAN_COUNT 4
 
 // ### 
 void loop() {

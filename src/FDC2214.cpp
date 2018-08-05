@@ -43,7 +43,7 @@ FDC2214::FDC2214(uint8_t i2caddr) {
 }
 
 // Checking for chip ID, if OK, calls chip init
-boolean FDC2214::begin(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchValue) {
+boolean FDC2214::begin(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchValue, bool intOsc) {
     Wire.begin();
 
     int devId = read16FDC(FDC2214_DEVICE_ID);
@@ -54,7 +54,7 @@ boolean FDC2214::begin(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchVa
         }
     }
 
-    loadSettings(chanMask, autoscanSeq, deglitchValue);
+    loadSettings(chanMask, autoscanSeq, deglitchValue, intOsc);
 //    setGain();
 
     return true;
@@ -62,7 +62,7 @@ boolean FDC2214::begin(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchVa
 
 
 //Internal routine to do actual chip init
-void FDC2214::loadSettings(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchValue) {
+void FDC2214::loadSettings(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchValue, bool intOsc) {
 
 	//Configuration register
 	//	Active channel Select: b00 = ch0; b01 = ch1; b10 = ch2; b11 = ch3;
@@ -74,11 +74,15 @@ void FDC2214::loadSettings(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglit
 	//  ||||||Reserved, set to 0
 	//  |||||||Disable interrupt. 0 - interrupt output on INTB pin; 1 - no interrupt output
 	//  ||||||||High current sensor mode: 0 - 1.5mA max. 1 - > 1.5mA, not available if Autoscan is enabled
-	//  |||||||||     Reserved, set to 000001
-	//  |||||||||     |
-	// CCS1A1R0IH000000 -> 0001 1110 1000 0001 -> 0x1E81
-	write16FDC(FDC2214_CONFIG, 0x1E81);  //set config
-
+	//  |||||||||      Reserved, set to 000001
+	//  |||||||||      |
+	//  CCS1A1R0IH000000 -> 0001 1110 1000 0001 -> 0x1E81 	ExtOsc
+	//  CCS1A1R0IH000000 -> 0001 1100 1000 0001 -> 0x1C81	IntOsc
+	if (intOsc) {
+		write16FDC(FDC2214_CONFIG, 0x1C81);  //set config
+	} else {
+		write16FDC(FDC2214_CONFIG, 0x1E81);  //set config
+	}
 	//If channel 1 selected, init it..
 	if (chanMask & 0x01) {
 
@@ -111,21 +115,21 @@ void FDC2214::loadSettings(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglit
 		write16FDC(FDC2214_DRIVE_CH1, 0xF800);	
 	}	
 	if (chanMask & 0x04) {
-		write16FDC(FDC2214_SETTLECOUNT_CH1, 0x64);
-		write16FDC(FDC2214_RCOUNT_CH1, 0xFFFF);
-		write16FDC(FDC2214_OFFSET_CH1, 0x0000);
-		write16FDC(FDC2214_CLOCK_DIVIDERS_CH1, 0x2001);
-		write16FDC(FDC2214_DRIVE_CH1, 0xF800);	
+		write16FDC(FDC2214_SETTLECOUNT_CH2, 0x64);
+		write16FDC(FDC2214_RCOUNT_CH2, 0xFFFF);
+		write16FDC(FDC2214_OFFSET_CH2, 0x0000);
+		write16FDC(FDC2214_CLOCK_DIVIDERS_CH2, 0x2001);
+		write16FDC(FDC2214_DRIVE_CH2, 0xF800);	
 	}	
 	if (chanMask & 0x08) {
-		write16FDC(FDC2214_SETTLECOUNT_CH1, 0x64);
-		write16FDC(FDC2214_RCOUNT_CH1, 0xFFFF);
-		write16FDC(FDC2214_OFFSET_CH1, 0x0000);
-		write16FDC(FDC2214_CLOCK_DIVIDERS_CH1, 0x2001);
-		write16FDC(FDC2214_DRIVE_CH1, 0xF800);	
+		write16FDC(FDC2214_SETTLECOUNT_CH3, 0x64);
+		write16FDC(FDC2214_RCOUNT_CH3, 0xFFFF);
+		write16FDC(FDC2214_OFFSET_CH3, 0x0000);
+		write16FDC(FDC2214_CLOCK_DIVIDERS_CH3, 0x2001);
+		write16FDC(FDC2214_DRIVE_CH3, 0xF800);	
 	}	
 	// Autoscan: 0 = single channel, selected by CONFIG.ACTIVE_CHAN
-	// | Autoscan sequence. b00 for chan 1-2, b01 for chan 1-2-3, b02 for chan 1-2-3-4
+	// | Autoscan sequence. b00 for chan 1-2, b01 for chan 1-2-3, b10 for chan 1-2-3-4
 	// | |         Reserved - must be b0001000001
 	// | |         |  Deglitch frequency. b001 for 1 MHz, b100 for 3.3 MHz, b101 for 10 Mhz, b111 for 33 MHz
 	// | |         |  |
@@ -202,19 +206,19 @@ unsigned long FDC2214::getReading28(uint8_t channel) {
 			bitUnreadConv = FDC2214_CH1_UNREADCONV;
 		break;
 		case (2):
-			addressMSB = FDC2214_DATA_CH1_MSB;
-			addressLSB = FDC2214_DATA_CH1_LSB;
-			bitUnreadConv = FDC2214_CH1_UNREADCONV;
+			addressMSB = FDC2214_DATA_CH2_MSB;
+			addressLSB = FDC2214_DATA_CH2_LSB;
+			bitUnreadConv = FDC2214_CH2_UNREADCONV;
 		break;
 		case (3):
-			addressMSB = FDC2214_DATA_CH1_MSB;
-			addressLSB = FDC2214_DATA_CH1_LSB;
-			bitUnreadConv = FDC2214_CH1_UNREADCONV;
+			addressMSB = FDC2214_DATA_CH3_MSB;
+			addressLSB = FDC2214_DATA_CH3_LSB;
+			bitUnreadConv = FDC2214_CH3_UNREADCONV;
 		break;
 		default: return 0;
 	}
 	
-	while (timeout && !(status & FDC2214_CH0_UNREADCONV)) {
+	while (timeout && !(status & bitUnreadConv)) {
         status = read16FDC(FDC2214_STATUS);
         timeout--;
     }
@@ -231,7 +235,7 @@ unsigned long FDC2214::getReading28(uint8_t channel) {
         //read the 28 bit result
         reading = (uint32_t)(read16FDC(addressMSB) & FDC2214_DATA_CHx_MASK_DATA) << 16;
         reading |= read16FDC(addressLSB);
-        while (timeout && !(status & FDC2214_CH0_UNREADCONV)) {
+        while (timeout && !(status & bitUnreadConv)) {
             status = read16FDC(FDC2214_STATUS);
             timeout--;
         }
@@ -266,17 +270,17 @@ unsigned long FDC2214::getReading16(uint8_t channel) {
 			bitUnreadConv = FDC2214_CH1_UNREADCONV;
 		break;
 		case (2):
-			addressMSB = FDC2214_DATA_CH1_MSB;
-			bitUnreadConv = FDC2214_CH1_UNREADCONV;
+			addressMSB = FDC2214_DATA_CH2_MSB;
+			bitUnreadConv = FDC2214_CH2_UNREADCONV;
 		break;
 		case (3):
-			addressMSB = FDC2214_DATA_CH1_MSB;
-			bitUnreadConv = FDC2214_CH1_UNREADCONV;
+			addressMSB = FDC2214_DATA_CH3_MSB;
+			bitUnreadConv = FDC2214_CH3_UNREADCONV;
 		break;
 		default: return 0;
 	}
 	
-	while (timeout && !(status & FDC2214_CH0_UNREADCONV)) {
+	while (timeout && !(status & bitUnreadConv)) {
         status = read16FDC(FDC2214_STATUS);
         timeout--;
     }
@@ -292,7 +296,7 @@ unsigned long FDC2214::getReading16(uint8_t channel) {
 		//could be stale grab another //could it really it? ?????
         //read the 28 bit result
         reading = (uint32_t)(read16FDC(addressMSB) & FDC2214_DATA_CHx_MASK_DATA) << 16;
-        while (timeout && !(status & FDC2214_CH0_UNREADCONV)) {
+        while (timeout && !(status & bitUnreadConv)) {
             status = read16FDC(FDC2214_STATUS);
             timeout--;
         }

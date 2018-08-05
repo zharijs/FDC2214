@@ -101,7 +101,7 @@ public:
     FDC2214(uint8_t i2caddr);
 	//_i2caddr = i2caddr
 	
-    boolean begin(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchValue);
+    boolean begin(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchValue, bool intOsc);
 
  //   double readCapacitance();
 // To be used with FDC2112 and FDC2114
@@ -110,7 +110,7 @@ public:
     unsigned long getReading28(uint8_t channel);
 
 private:
-    void loadSettings(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchValue);
+    void loadSettings(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglitchValue, bool intOsc);
 //    void setGain(void);
 //    double calculateCapacitance(long long fsensor);
 //    long long calculateFsensor(unsigned long reading);

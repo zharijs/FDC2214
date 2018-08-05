@@ -7,6 +7,11 @@ Library for Texas Instruments FDC2xxx family capacitative sensor front-ends.
 >* FDC2212
 >* FDC2214
 
+# Revision
+>* 1.0 - 1 - Initial release 
+>* 1.1 - 1 - Fixed channel 2 and 3 support. 
+>* 1.1 - 2 - Added support for internal oscillator. Not reccomended for any fairly precise aplication. 
+
 # Usage
 Include header, Make instance, Init and acquire data.
 
@@ -17,7 +22,7 @@ FDC2214 capsense(FDC2214_I2C_ADDR_0); // Use FDC2214_I2C_ADDR_1 for ADDR = VCC
 void setup() {
     ...
     Wire.begin();
-    bool capOk = capsense.begin(0x3, 0x4, 0x5); //setup first two channels, autoscan with 2 channels, deglitch at 10MHz 
+    bool capOk = capsense.begin(0x3, 0x4, 0x5, false); //setup first two channels, autoscan with 2 channels, deglitch at 10MHz, use external oscillator 
     ...
 }
 void loop(){
