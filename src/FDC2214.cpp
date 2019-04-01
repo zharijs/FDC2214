@@ -369,48 +369,42 @@ uint8_t FDC2214::read8FDC(uint16_t address) {
     return r;
 }
 
-// Read 2 byte from the FDC at 'address'
+// Read 4 bytes from the FDC at 'address'
 uint32_t FDC2214::read32FDC(uint16_t address) {
     uint32_t retVal = 0;
-	uint8_t data;
 
     Wire.beginTransmission(_i2caddr);
-//    Wire.write(address >> 8);
     Wire.write(address);
     Wire.endTransmission(false);
 
-    Wire.requestFrom(_i2caddr, (uint8_t) 2);
-    while (!Wire.available());
-    data = Wire.read();
-    retVal |= (uint32_t)data << 24; 
-    while (!Wire.available());
-    data = Wire.read();
-    retVal |= (uint32_t)data << 16;
-    while (!Wire.available());
-    data = Wire.read();
-    retVal |= (uint32_t)data << 8;
-    while (!Wire.available());
-    data = Wire.read();
-    retVal |= data;
+    Wire.requestFrom(_i2caddr, (uint8_t) 4);
+
+    if (Wire.available() == 4) {
+        retVal |= (uint32_t) Wire.read() << 24; 
+        retVal |= (uint32_t) Wire.read() << 16;
+        retVal |= (uint32_t) Wire.read() << 8;
+        retVal |= (uint32_t) Wire.read();
+    }
+
     return retVal;
 }
 
-// Read 2 byte from the FDC at 'address'
+// Read 2 bytes from the FDC at 'address'
 uint16_t FDC2214::read16FDC(uint16_t address) {
     uint16_t data;
 
     Wire.beginTransmission(_i2caddr);
-//    Wire.write(address >> 8);
     Wire.write(address);
     Wire.endTransmission(false); //restart
 
     Wire.requestFrom(_i2caddr, (uint8_t) 2);
-    while (!Wire.available());
-    data = Wire.read();
-    data <<= 8;
-    while (!Wire.available());
-    data |= Wire.read();
-    Wire.endTransmission(true); //end
+
+    if (Wire.available() == 2) {
+        data = Wire.read();
+        data <<= 8;
+        data |= Wire.read();
+    }
+
     return data;
 }
 
