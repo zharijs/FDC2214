@@ -189,7 +189,6 @@ void FDC2214::loadSettings(uint8_t chanMask, uint8_t autoscanSeq, uint8_t deglit
 unsigned long FDC2214::getReading28(uint8_t channel) {
     int timeout = 100;
     unsigned long reading = 0;
-    long long fsensor = 0;
     int status = read16FDC(FDC2214_STATUS);
     uint8_t addressMSB;
 	uint8_t addressLSB;
@@ -256,7 +255,6 @@ unsigned long FDC2214::getReading28(uint8_t channel) {
 unsigned long FDC2214::getReading16(uint8_t channel) {
     int timeout = 100;
     unsigned long reading = 0;
-    long long fsensor = 0;
     int status = read16FDC(FDC2214_STATUS);
     uint8_t addressMSB;
 	uint8_t bitUnreadConv;
@@ -356,42 +354,9 @@ unsigned long FDC2214::getReading16(uint8_t channel) {
 */
 /**************************************************************************/
 
-
-// Read 1 byte from the FDC at 'address'
-uint8_t FDC2214::read8FDC(uint16_t address) {
-    uint8_t data;
-    Wire.beginTransmission(_i2caddr);
-    Wire.write(address >> 8);
-    Wire.write(address);
-    Wire.endTransmission(false);
-    Wire.requestFrom(_i2caddr, (uint8_t) 1);
-    uint8_t r = Wire.read();
-    return r;
-}
-
-// Read 4 bytes from the FDC at 'address'
-uint32_t FDC2214::read32FDC(uint16_t address) {
-    uint32_t retVal = 0;
-
-    Wire.beginTransmission(_i2caddr);
-    Wire.write(address);
-    Wire.endTransmission(false);
-
-    Wire.requestFrom(_i2caddr, (uint8_t) 4);
-
-    if (Wire.available() == 4) {
-        retVal |= (uint32_t) Wire.read() << 24; 
-        retVal |= (uint32_t) Wire.read() << 16;
-        retVal |= (uint32_t) Wire.read() << 8;
-        retVal |= (uint32_t) Wire.read();
-    }
-
-    return retVal;
-}
-
 // Read 2 bytes from the FDC at 'address'
 uint16_t FDC2214::read16FDC(uint16_t address) {
-    uint16_t data;
+    uint16_t data = 0;
 
     Wire.beginTransmission(_i2caddr);
     Wire.write(address);
@@ -406,15 +371,6 @@ uint16_t FDC2214::read16FDC(uint16_t address) {
     }
 
     return data;
-}
-
-// write 1 byte to FDC
-void FDC2214::write8FDC(uint16_t address, uint8_t data) {
-    Wire.beginTransmission(_i2caddr);
-    Wire.write(address >> 8);
-    Wire.write(address);
-    Wire.write(data);
-    Wire.endTransmission();
 }
 
 // write 2 bytes to FDC  
