@@ -11,6 +11,7 @@ Library for Texas Instruments FDC2xxx family capacitative sensor front-ends.
 >* 1.0 - 1 - Initial release 
 >* 1.1 - 1 - Fixed channel 2 and 3 support. 
 >* 1.1 - 2 - Added support for internal oscillator. Not reccomended for any fairly precise aplication. 
+>* 1.2 - 1 - RJH - Removed redundent code and applied one recommended update
 
 # Usage
 Include header, Make instance, Init and acquire data.
