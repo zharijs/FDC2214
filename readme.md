@@ -48,8 +48,7 @@ FDC2xxx family is 3.3V powered, unlike most of Arduinos, that are powered form 5
   
 # Tools
 To view nice real-time graph of the sensor output, it is highly recommended to use tool like SerialPlot.
-https://bitbucket.org/hyOzd/serialplot
-Binary downloads avialable here: https://bitbucket.org/hyOzd/serialplot/downloads/
+https://github.com/hyOzd/serialplot
 
 **Setting up port:**
 ![Port](https://github.com/zharijs/FDC2214/blob/master/extras/images/fdc-on-serialplot-port.PNG?raw=true "Port")
